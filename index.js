@@ -1,25 +1,30 @@
-import {Client} from 'discord.js'
+import { Client, GatewayIntentBits } from 'discord.js';
 import { config } from 'dotenv'
 config();
 
+const { DISCORD_TOKEN } = process.env;
 
-// const Discord = require('discord.js');
+const client = new Client({ intents: [GatewayIntentBits.Guilds] });
 
-const client = new Client({ intents: [] });
-const PREFIX = '!';
+client.on('ready', () => {
+  console.log(`Logged in as ${client.user.tag}!`);
+});
+
 
 const lista = [
-  { dia: 'Segunda-feira', pessoa: 'Fulano' },
-  { dia: 'Terça-feira', pessoa: 'Ciclano' },
-  { dia: 'Quarta-feira', pessoa: 'Beltrano' },
-  { dia: 'Quinta-feira', pessoa: 'Deltrano' },
-  { dia: 'Sexta-feira', pessoa: 'Estrano' },
+  { dia: 'segunda-feira', pessoa: 'Patric' },
+  { dia: 'terça-feira', pessoa: 'Richard' },
+  { dia: 'quarta-feira', pessoa: 'Rolyson' },
+  { dia: 'quinta-feira', pessoa: 'Emmanuel' },
+  { dia: 'sexta-feira', pessoa: 'Pamela' },
 ];
 
 function getPessoaDoDia() {
   const hoje = new Date();
-  const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+  const options = { weekday: 'long'}; //, year: 'numeric', month: 'long', day: 'numeric' 
   const diaDaSemana = hoje.toLocaleDateString('pt-BR', options)
+
+  console.log(diaDaSemana)
   // const diaDaSemana = hoje.toLocaleDateString('pt-BR', { weekday: 'segunda-feira' });
 
   for (let i = 0; i < lista.length; i++) {
@@ -43,28 +48,19 @@ function getLista() {
   return listaTexto;
 }
 
-client.on('message', (message) => {
-  console.log(message.channel);
-  if (message.author.bot) return;
 
-  if (message.content.startsWith(PREFIX)) {
-    const [command, ...args] = message.content
-      .trim()
-      .substring(PREFIX.length)
-      .split(/\s+/);
+client.on('interactionCreate', async interaction => {
+  if (!interaction.isChatInputCommand()) return;
 
-    if (command === 'paododia') {
-      const pessoaDoDia = getPessoaDoDia();
-      message.channel.send(`Hoje é dia de ${pessoaDoDia} trazer o pão`);
-    } else if (command === 'listapao') {
-      const listaTexto = getLista();
-      message.channel.send(listaTexto);
-    }
+  if (interaction.commandName === 'ping') {
+    await interaction.reply('Pong!');
+  } else if (interaction.commandName === 'amanha'){
+    const pessoaDoDia = getPessoaDoDia();
+    await interaction.reply(`Hoje é dia de ${pessoaDoDia} trazer o pão`);
+  } else if (interaction.commandName === 'lista') {
+    await interaction.reply(`lista: ${getLista()}`);
   }
+  
 });
 
-client.login(process.env.DISCORD_TOKEN);
-
-
-const message = { content: '!paododia', author: { bot: false } };
-client.emit('message', message);
+client.login(DISCORD_TOKEN);
