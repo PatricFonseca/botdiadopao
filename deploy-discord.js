@@ -18,6 +18,10 @@ const commands = [
     name: 'lista',
     description: 'lista de pessoas!',
   },
+  { 
+    name: 'pao',
+    description: 'Pessoa do dia'
+  }
 ];
 
 const rest = new REST({ version: '10' }).setToken(DISCORD_TOKEN);
