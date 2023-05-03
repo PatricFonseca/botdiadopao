@@ -47,7 +47,7 @@ function getPeopleDay() {
 }
 
 // Verifique se é meia-noite e remova um elemento da lista
-function removeElement(channels) {
+function removeElement() {
   // Obtenha a hora atual
   const now = new Date();
   const hour = now.getUTCHours(); // use UTC para evitar problemas com fuso horário
