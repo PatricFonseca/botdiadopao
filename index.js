@@ -1,6 +1,7 @@
 import { Client, GatewayIntentBits } from "discord.js";
-import { api } from "./api.js";
 import { config } from "dotenv";
+import cron from "node-cron";
+import { api } from "./api.js";
 config();
 
 const { DISCORD_TOKEN, CHANNEL_NAME } = process.env;
@@ -46,28 +47,23 @@ function getPeopleDay() {
   // return timePeople + weekday
 }
 
-// Verifique se é meia-noite e remova um elemento da lista
 function removeElement() {
   // Obtenha a hora atual
   const now = new Date();
-  const hour = now.getUTCHours(); // use UTC para evitar problemas com fuso horário
-  const minute = now.getUTCMinutes();
 
   // Formatando a data atual para o formato yyyy-mm-dd
   const formatedDate = `${now.getFullYear()}-${(now.getMonth() + 1)
     .toString()
     .padStart(2, "0")}-${now.getDate().toString().padStart(2, "0")}`;
 
-  // Verifique se é meia-noite (00:00 UTC)
-  if (hour === 0 && minute === 0) {
-    // está entre segunda e sexta
-    if (now.getDay() >= 1 && now.getDay() <= 5) {
-      // é um feriado
-      if (!HOLIDAYS.includes(formatedDate)) {
-        getPeopleDay();
-      }
+  // está entre segunda e sexta
+  if (now.getDay() >= 1 && now.getDay() <= 5) {
+    // se não é um feriado
+    if (!HOLIDAYS.includes(formatedDate)) {
+      getPeopleDay();
     }
   }
+  // }
 }
 
 async function loadHolidays() {
@@ -83,30 +79,8 @@ client.on("ready", async () => {
   await loadHolidays();
 
   channel = client.channels.cache.find((ch) => ch.name === CHANNEL_NAME);
-  channel.send("hello i am alive");
-
-  // Obtenha a hora atual em UTC
-  const now = new Date();
-  const hour = now.getUTCHours(); // use UTC para evitar problemas com fuso horário
-  const minute = now.getUTCMinutes();
-
-  // Calcule quanto tempo falta até a próxima meia-noite (00:00 UTC)
-  const msUntilMidnight = (24 - hour) * 60 * 60 * 1000 - minute * 60 * 1000;
-
-  // Espere até a próxima meia-noite (00:00 UTC) e, em seguida, execute a função de remoção de elementos uma vez por dia
-  setTimeout(() => {
-    removeElement(channels);
-    setInterval(removeElement, 24 * 60 * 60 * 1000);
-  }, msUntilMidnight);
+  channel.send("hello world!");
 });
-
-// const lista = [
-//   { dia: 'segunda-feira', pessoa: 'Patric' },
-//   { dia: 'terça-feira', pessoa: 'Richard' },
-//   { dia: 'quarta-feira', pessoa: 'Rolyson' },
-//   { dia: 'quinta-feira', pessoa: 'Emmanuel' },
-//   { dia: 'sexta-feira', pessoa: 'Pamela' },
-// ];
 
 function getPessoaDoDia() {
   const hoje = new Date();
@@ -114,7 +88,6 @@ function getPessoaDoDia() {
   const diaDaSemana = hoje.toLocaleDateString("pt-BR", options);
 
   console.log(diaDaSemana);
-  // const diaDaSemana = hoje.toLocaleDateString('pt-BR', { weekday: 'segunda-feira' });
 
   for (let i = 0; i < lista.length; i++) {
     const item = lista[i];
@@ -155,3 +128,7 @@ client.on("interactionCreate", async (interaction) => {
 });
 
 client.login(DISCORD_TOKEN);
+
+cron.schedule("0 0 * * *", () => {
+  removeElement();
+});
