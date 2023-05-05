@@ -11,40 +11,70 @@ const client = new Client({ intents: [GatewayIntentBits.Guilds] });
 const PEOPLE = [
   "Richard",
   "Patric",
-  "Rolyson",
+  "Pamela",  
   "Emmanuel",
-  "Pamela",
-  "Charles",
+  "Rolyson",
   "Eliane",
+  "Charles",
 ];
 
-const WEEK = ["Segunda", "Terça", "Quarta", "Quinta", "Sexta"];
+const WEEK = ["Sexta", "Segunda", "Terça", "Quarta", "Quinta"];
 const HOLIDAYS = [];
 
 let peopleList = PEOPLE;
 let weekList = WEEK;
 let lastPeopleRemoved = [];
 let channel = null;
+let bread_leo = false
 
 function getPeopleDay() {
   if (peopleList.length === 0) {
     peopleList = PEOPLE;
   }
 
-  const timePeople = peopleList.shift();
-  console.log(timePeople);
+  const person = peopleList.shift();
+  console.log(person);
 
   if (weekList.length === 0) {
     weekList = WEEK;
   }
 
-  const weekday = weekList.shift();
-  console.log(weekday);
+  const day = weekList.shift();
+  console.log(day);
 
-  lastPeopleRemoved.push(timePeople + " " + weekday);
+  let bread_quantity = PEOPLE.length
+
+  if (bread_leo) {
+    bread_quantity += 1 
+  }
+
+  lastPeopleRemoved.push(person + " " + day + ":" + bread_quantity + " pães " );
 
   channel.send(lastPeopleRemoved[lastPeopleRemoved.length - 1]);
   // return timePeople + weekday
+}
+
+function getNextPersonOnQueue() {
+  let person = null
+  let day = null
+
+  if (peopleList.length > 0) { 
+    person = peopleList[0]
+  } else {
+    person = PEOPLE[0]
+  }
+
+  if (weekList.length > 0) { 
+    day = weekList[0]
+  }
+  else {
+    day = WEEK[0]
+  }
+
+  let quantity = bread_leo ? PEOPLE.length + 1 : PEOPLE.length  
+
+  channel.send(person + " " + day + ": " + quantity + " pães" )
+
 }
 
 function removeElement() {
@@ -82,23 +112,6 @@ client.on("ready", async () => {
   channel.send("hello world!");
 });
 
-function getPessoaDoDia() {
-  const hoje = new Date();
-  const options = { weekday: "long" }; //, year: 'numeric', month: 'long', day: 'numeric'
-  const diaDaSemana = hoje.toLocaleDateString("pt-BR", options);
-
-  console.log(diaDaSemana);
-
-  for (let i = 0; i < lista.length; i++) {
-    const item = lista[i];
-    if (item.dia === diaDaSemana) {
-      return item.pessoa;
-    }
-  }
-
-  return "Não há pão hoje";
-}
-
 function getLista() {
   let listaTexto = "Lista de pessoas para o pão da semana:\n\n";
 
@@ -110,25 +123,34 @@ function getLista() {
   return listaTexto;
 }
 
+function add_leo_bread() {
+  bread_leo = true
+}
+
+function remove_leo_bread() { 
+  bread_leo = false
+}
+
 client.on("interactionCreate", async (interaction) => {
   if (!interaction.isChatInputCommand()) return;
 
   if (interaction.commandName === "ping") {
     await interaction.reply("Pong!");
   } else if (interaction.commandName === "amanha") {
-    const pessoaDoDia = getPessoaDoDia();
-    await interaction.reply(`Hoje é dia de ${pessoaDoDia} trazer o pão`);
+    getNextPersonOnQueue()
+    // const pessoaDoDia = getPessoaDoDia();
+    // await interaction.reply(`Hoje é dia de ${pessoaDoDia} trazer o pão`);
   } else if (interaction.commandName === "lista") {
     await interaction.reply(`lista: ${getLista()}`);
-  } else if (interaction.commandName === "pao") {
-    await interaction.reply(
-      `pao: ${lastPeopleRemoved[lastPeopleRemoved.length - 1]}`
-    );
+  } else if (interaction.commandName === "leo_quer_pao") {
+    add_leo_bread()
+  } else if (interaction.commandName === "leo_nao_quer_pao") {
+    remove_leo_bread()
   }
 });
 
 client.login(DISCORD_TOKEN);
 
-cron.schedule("0 0 * * *", () => {
+cron.schedule("0 9 * * *", () => {
   removeElement();
 });

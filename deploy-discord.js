@@ -19,8 +19,12 @@ const commands = [
     description: 'lista de pessoas!',
   },
   { 
-    name: 'pao',
-    description: 'Pessoa do dia'
+    name: 'leo_quer_pao',
+    description: 'Adiciona mais um pão na lista'
+  },
+  {
+    name: 'leo_nao_quer_pao',
+    description: 'Remove um pão na lista'
   }
 ];
 
