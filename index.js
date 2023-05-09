@@ -164,8 +164,10 @@ client.on("interactionCreate", async (interaction) => {
     await interaction.reply(`lista: ${getLista()}`);
   } else if (interaction.commandName === "leo_quer_pao") {
     add_leo_bread()
+    await interaction.reply("Leo quer um pão");
   } else if (interaction.commandName === "leo_nao_quer_pao") {
     remove_leo_bread()
+    await interaction.reply("Ta tudo bem? Quer um abraço?");
   }
 });
 
