@@ -9,16 +9,26 @@ const { DISCORD_TOKEN, CHANNEL_NAME } = process.env;
 
 const client = new Client({ intents: [GatewayIntentBits.Guilds] });
 
-const WEEK = ["Terça", "Quarta", "Quinta", "Sexta", "Segunda"];
+const WEEK = [
+  "Domingo",
+  "Segunda",
+  "Terça",
+  "Quarta",
+  "Quinta",
+  "Sexta",
+  "Sábado",
+];
+
+// const WEEK = ["Terça", "Quarta", "Quinta", "Sexta", "Segunda"];
 const HOLIDAYS = [];
 
 let peopleList = PEOPLE.slice();
-let weekList = WEEK;
+// let weekList = WEEK;
 let channel = null;
 let bread_leo = false;
 let response = "";
 
-function getPeopleDay() {
+function getPersonDay() {
   if (peopleList.length === 0) {
     peopleList = PEOPLE.slice();
   }
@@ -26,12 +36,9 @@ function getPeopleDay() {
   const person = peopleList.shift();
   console.log(person);
 
-  if (weekList.length === 0) {
-    weekList = WEEK.slice();
-  }
-
-  const day = weekList.shift();
-  console.log(day);
+  const dayOfWeek = new Date().getDay();
+  const dayName = WEEK[dayOfWeek];
+  console.log(dayOfWeek);
 
   let bread_quantity = PEOPLE.length;
 
@@ -42,7 +49,7 @@ function getPeopleDay() {
   response =
     person.nome +
     " " +
-    day +
+    dayName +
     ":" +
     bread_quantity +
     " pães " +
@@ -56,9 +63,18 @@ function getPeopleDay() {
   // return timePeople + weekday
 }
 
+function getNextUtilDay() {
+  let dayOfWeek = new Date().getDay();
+
+  if (dayOfWeek == 0 || dayOfWeek == 6) {
+    dayOfWeek = 1;
+  }
+
+  return WEEK[dayOfWeek];
+}
+
 function getNextPersonOnQueue() {
   let person = null;
-  let day = null;
 
   if (peopleList.length > 0) {
     person = peopleList[0];
@@ -66,17 +82,15 @@ function getNextPersonOnQueue() {
     person = PEOPLE[0];
   }
 
-  if (weekList.length > 0) {
-    day = weekList[0];
-  } else {
-    day = WEEK[0];
-  }
+  const dayName = getNextUtilDay();
 
   let quantity = bread_leo ? PEOPLE.length + 1 : PEOPLE.length;
 
-  console.log(person.nome + " " + day + ": " + quantity + " pães");
+  console.log(person.nome + " " + dayName + ": " + quantity + " pães");
 
-  return person.nome + " " + day + ": " + quantity + " pães" + " " + person.gif;
+  return (
+    person.nome + " " + dayName + ": " + quantity + " pães" + " " + person.gif
+  );
 }
 
 function removeElement() {
@@ -92,7 +106,7 @@ function removeElement() {
   if (now.getDay() >= 1 && now.getDay() <= 5) {
     // se não é um feriado
     if (!HOLIDAYS.includes(formatedDate)) {
-      getPeopleDay();
+      getPersonDay();
     }
   }
   // }
