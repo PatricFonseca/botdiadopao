@@ -1,8 +1,10 @@
 import { Client, GatewayIntentBits } from "discord.js";
+import Fastify from "fastify";
 import { config } from "dotenv";
 import cron from "node-cron";
 import { api } from "./lib/api.js";
 import { PEOPLE } from "./lib/constants/people-list.js";
+
 config();
 
 const { DISCORD_TOKEN, CHANNEL_NAME } = process.env;
@@ -189,4 +191,20 @@ cron.schedule("30 * * * * * *", () => {
 //Roda todo dia 6 horas
 cron.schedule("0 9 * * *", () => {
   removeElement();
+});
+
+const fastify = Fastify({
+  logger: true,
+});
+
+fastify.get("/", async (request, reply) => {
+  return { hello: "world" };
+});
+
+fastify.listen({ port: 3000, host: "0.0.0.0" }, function (err, address) {
+  if (err) {
+    fastify.log.error(err);
+    process.exit(1);
+  }
+  fastify.log.info(`server listening on ${address}`);
 });
